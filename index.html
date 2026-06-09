@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Aspirasi & KLIK DPRD Kabupaten Sinjai</title>
+    <!-- Tailwind CSS & FontAwesome Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js untuk Visualisasi Dashboard Pemetaan -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body id="main-body-bg" class="bg-slate-50 text-slate-800 font-sans antialiased transition-all duration-500">
+
+    <!-- TOP BAR / HEADER LOGIN ADMIN -->
+    <div class="bg-blue-950 text-slate-400 text-[11px] py-1.5 px-4 border-b border-blue-900/40 relative z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div><i class="fa-solid fa-circle-info text-amber-500 mr-1"></i> Layanan Pengaduan Online Resmi DPRD Sinjai</div>
+            <div id="admin-status-bar">
+                <button type="button" onclick="bukaModalLogin()" class="text-slate-300 hover:text-amber-400 font-bold tracking-wide transition uppercase cursor-pointer">
+                    <i class="fa-solid fa-lock mr-1"></i> Login / Daftar Pengelola
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING ADMIN CONTROL BUTTON -->
+    <div id="floating-admin-btn" class="fixed bottom-6 right-6 z-[100] hidden">
+        <button type="button" onclick="toggleAdminPanel()" class="bg-red-600 hover:bg-red-700 text-white font-bold p-4 rounded-full shadow-2xl flex items-center justify-center space-x-2 transition transform hover:scale-105 active:scale-95 animate-bounce cursor-pointer">
+            <i class="fa-solid fa-user-gear text-lg"></i>
+            <span class="text-xs uppercase tracking-wider pr-1 hidden md:inline">Panel Pengelola</span>
+        </button>
+    </div>
+
+    <!-- MODAL POP-UP: AUTHENTICATION (LOGIN & REGISTRASI) -->
+    <div id="loginModal" class="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-slate-900 text-white w-full max-w-md p-6 rounded-2xl border border-slate-800 shadow-2xl mx-4" onclick="event.stopPropagation()">
+            
+            <!-- Tab Selector -->
+            <div class="flex border-b border-slate-800 mb-6 font-bold text-xs uppercase tracking-wider">
+                <button onclick="switchAuthTab('login')" id="tab-login-btn" class="w-1/2 pb-3 text-amber-400 border-b-2 border-amber-400 text-center">Masuk</button>
+                <button onclick="switchAuthTab('register')" id="tab-register-btn" class="w-1/2 pb-3 text-slate-400 text-center hover:text-white">Daftar Admin Baru</button>
+            </div>
+
+            <!-- FORM LOGIN -->
+            <form id="form-login-internal" class="space-y-4">
+                <div class="text-center mb-2">
+                    <h3 class="text-sm font-black tracking-wide text-amber-400 uppercase">Otentikasi Pengelola</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Masukkan akun terdaftar untuk membuka kontrol penuh</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 uppercase font-bold mb-1 tracking-wider">Username Admin</label>
+                    <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl p-3 focus-within:border-amber-500">
+                        <i class="fa-solid fa-user text-slate-500 mr-3 text-sm"></i>
+                        <input type="text" id="login-username" required class="bg-transparent w-full outline-none text-sm font-medium text-white placeholder-slate-600" placeholder="Username...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 uppercase font-bold mb-1 tracking-wider">Password Kontrol</label>
+                    <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl p-3 focus-within:border-amber-500">
+                        <i class="fa-solid fa-key text-slate-500 mr-3 text-sm"></i>
+                        <input type="password" id="login-password" required class="bg-transparent w-full outline-none text-sm font-medium tracking-widest text-white placeholder-slate-600" placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="tutupModalLogin()" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Batal</button>
+                    <button type="submit" class="w-2/3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-md transition">Masuk Sistem</button>
+                </div>
+            </form>
+
+            <!-- FORM REGISTRASI ADMIN -->
+            <form id="form-register-internal" class="space-y-4 hidden">
+                <div class="text-center mb-2">
+                    <h3 class="text-sm font-black tracking-wide text-blue-400 uppercase">Registrasi Akun Baru</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Daftarkan kredensial pengelola baru ke dalam sistem internal</p>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 uppercase font-bold mb-1 tracking-wider">Buat Username Baru</label>
+                    <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl p-3 focus-within:border-blue-500">
+                        <i class="fa-solid fa-user-plus text-slate-500 mr-3 text-sm"></i>
+                        <input type="text" id="reg-username" required class="bg-transparent w-full outline-none text-sm font-medium text-white placeholder-slate-600" placeholder="Buat username unik...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 uppercase font-bold mb-1 tracking-wider">Buat Password</label>
+                    <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl p-3 focus-within:border-blue-500">
+                        <i class="fa-solid fa-lock text-slate-500 mr-3 text-sm"></i>
+                        <input type="password" id="reg-password" required class="bg-transparent w-full outline-none text-sm font-medium tracking-widest text-white placeholder-slate-600" placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="tutupModalLogin()" class="w-1/3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Batal</button>
+                    <button type="submit" class="w-2/3 bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-xl text-xs uppercase tracking-widest shadow-md transition">Daftarkan Akun</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="bg-blue-950 text-white shadow-xl sticky top-0 z-40 border-b border-blue-900">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 p-2.5 rounded-xl text-blue-950 font-bold text-xl shadow-inner">
+                    <i class="fa-solid fa-landmark"></i>
+                </div>
+                <div>
+                    <span id="nav-brand-title" class="font-black text-xl block tracking-wider">KLIK DPRD</span>
+                    <span id="nav-brand-sub" class="text-xs text-amber-400 block font-semibold tracking-wide -mt-0.5">Kanal Layanan Informasi Kontemporer & e-Aspirasi</span>
+                </div>
+            </div>
+            <div id="main-navbar-links" class="hidden lg:flex space-x-6 font-bold text-sm tracking-wide">
+                <a href="#beranda" id="link-menu1" class="hover:text-amber-400 transition py-2">Beranda</a>
+                <a href="#dashboard-pemetaan" id="link-menu2" class="hover:text-amber-400 transition py-2">Dashboard Pemetaan</a>
+                <a href="#wilayah-dapil" id="link-menu3" class="hover:text-amber-400 transition py-2">Wilayah Dapil</a>
+                <a href="#direktori-dewan" id="link-menu4" class="hover:text-amber-400 transition py-2">Profil Anggota</a>
+                <a href="#tracer-pokir" id="link-menu5" class="hover:text-amber-400 transition py-2">Tracer Pokir</a>
+                <a href="#info-kontemporer" id="link-menu6" class="hover:text-amber-400 transition py-2">Live & Virtual Tour</a>
+                <a href="#formulir-aduan" id="link-menu7" class="bg-amber-500 text-blue-950 px-5 py-2 rounded-xl hover:bg-amber-600 transition shadow-md transform active:scale-95">Kirim Aspirasi</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO HEADER -->
+    <header id="beranda" class="relative py-36 px-4 text-center bg-cover bg-center bg-no-repeat overflow-hidden transition-all duration-500" style="background-image: url('IMG-20250131-WA0051.jpg');">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-950/75 via-slate-950/65 to-blue-950/80 z-0"></div>
+        
+        <div class="max-w-4xl mx-auto relative z-10">
+            <span class="bg-blue-950/80 border border-blue-700/60 text-amber-400 text-xs font-bold uppercase px-4 py-1.5 rounded-full tracking-widest shadow-md backdrop-blur-sm">Reformasi Birokrasi & Pelayanan Publik Sekretariat DPRD</span>
+            <h1 id="hero-title" class="text-4xl md:text-5xl font-black mt-6 mb-4 leading-tight tracking-tight text-white drop-shadow-lg">Menjembatani Konstituen<br>dengan 30 Anggota DPRD Kab. Sinjai</h1>
+            <p id="hero-desc" class="text-slate-100 text-base md:text-lg max-w-2xl mx-auto mb-10 font-medium drop-shadow-md">Sistem penyerapan aspirasi masyarakat terintegrasi berdasarkan wilayah Dapil dan sektor pembangunan untuk memudahkan perumusan Pokok Pikiran (Pokir) ke dalam RKPD.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#formulir-aduan" class="bg-amber-500 hover:bg-amber-600 text-blue-950 font-bold px-8 py-4 rounded-xl shadow-lg transition duration-300 transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-comment-dots mr-2"></i> Ajukan Aspirasi Baru
+                </a>
+                <a href="#tracer-pokir" class="bg-blue-950/70 border-2 border-white/20 hover:border-white/60 hover:bg-blue-950/90 text-white font-bold px-8 py-4 rounded-xl transition duration-300 backdrop-blur-sm">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Lacak Status Pokir
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: DASHBOARD PEMETAAN -->
+    <section id="dashboard-pemetaan" class="max-w-7xl mx-auto px-4 py-20">
+        <div class="text-center mb-12">
+            <h2 id="sec1-title" class="text-3xl font-extrabold text-blue-950 tracking-tight">Dashboard Pemetaan Aspirasi</h2>
+            <p id="sec1-desc" class="text-slate-500 text-sm mt-2 max-w-xl mx-auto">Data aspirasi masyarakat diklasifikasikan secara otomatis oleh sistem Sekretariat berdasarkan wilayah Daerah Pemilihan (Dapil 1 - 4) dan sektor pembangunan.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 text-center border-b pb-3 uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-blue-600 mr-2"></i>Persentase Kategori Sektor Aspirasi</h3>
+                <div class="relative h-64 flex justify-center">
+                    <canvas id="canvasSektor"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 text-center border-b pb-3 uppercase tracking-wider"><i class="fa-solid fa-chart-column text-amber-500 mr-2"></i>Volume Aspirasi per Dapil Kabupaten Sinjai</h3>
+                <div class="relative h-64 flex justify-center">
+                    <canvas id="canvasDapil"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: PEMBAGIAN DAPIL -->
+    <section id="wilayah-dapil" class="bg-slate-100/80 py-20 border-t border-b border-slate-200/60 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 id="sec2-title" class="text-3xl font-extrabold tracking-tight text-blue-950">Wilayah Daerah Pemilihan (Dapil)</h2>
+                <p id="sec2-desc" class="text-slate-500 text-sm mt-2 max-w-xl mx-auto">Pembagian wilayah kerja koordinasi penyerapan aspirasi di Kabupaten Sinjai.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                    <div class="text-blue-950 text-2xl font-black mb-2">DAPIL 1</div>
+                    <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400 border-b pb-2 mb-3">Cakupan Wilayah:</div>
+                    <ul class="text-sm text-slate-700 space-y-2 font-medium">
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Utara</li>
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Pulau Sembilan</li>
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Bulupoddo</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                    <div class="text-blue-950 text-2xl font-black mb-2">DAPIL 2</div>
+                    <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400 border-b pb-2 mb-3">Cakupan Wilayah:</div>
+                    <ul class="text-sm text-slate-700 space-y-2 font-medium">
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Timur</li>
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Tellulimpoe</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                    <div class="text-blue-950 text-2xl font-black mb-2">DAPIL 3</div>
+                    <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400 border-b pb-2 mb-3">Cakupan Wilayah:</div>
+                    <ul class="text-sm text-slate-700 space-y-2 font-medium">
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Selatan</li>
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Borong</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                    <div class="text-blue-950 text-2xl font-black mb-2">DAPIL 4</div>
+                    <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400 border-b pb-2 mb-3">Cakupan Wilayah:</div>
+                    <ul class="text-sm text-slate-700 space-y-2 font-medium">
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Tengah</li>
+                        <li><i class="fa-solid fa-location-dot text-amber-500 mr-2"></i>Sinjai Barat</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: DIREKTORI ANGGOTA DEWAN -->
+    <section id="direktori-dewan" class="bg-blue-950/95 text-white py-20 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 id="sec3-title" class="text-3xl font-extrabold tracking-tight">Direktori Anggota DPRD Kabupaten Sinjai</h2>
+                <p id="sec3-desc" class="text-slate-400 text-sm mt-2 max-w-xl mx-auto">Gunakan filter di bawah ini untuk melihat daftar Anggota Dewan berdasarkan Daerah Pemilihan mereka.</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <button onclick="filterDewan('all')" id="btn-all" class="filter-btn bg-amber-500 text-blue-950 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md">Semua Dapil</button>
+                <button onclick="filterDewan('dapil1')" id="btn-dapil1" class="filter-btn bg-blue-900 border border-blue-800 hover:border-amber-500 text-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Dapil 1</button>
+                <button onclick="filterDewan('dapil2')" id="btn-dapil2" class="filter-btn bg-blue-900 border border-blue-800 hover:border-amber-500 text-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Dapil 2</button>
+                <button onclick="filterDewan('dapil3')" id="btn-dapil3" class="filter-btn bg-blue-900 border border-blue-800 hover:border-amber-500 text-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Dapil 3</button>
+                <button onclick="filterDewan('dapil4')" id="btn-dapil4" class="filter-btn bg-blue-900 border border-blue-800 hover:border-amber-500 text-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Dapil 4</button>
+            </div>
+            <div id="grid-dewan" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Data dinamis -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: TRACER POKIR -->
+    <section id="tracer-pokir" class="bg-slate-100/80 py-20 border-b border-slate-200/60 backdrop-blur-sm">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 id="sec4-title" class="text-3xl font-extrabold text-blue-950 tracking-tight">Tracer Pokir (Pokok Pikiran)</h2>
+                <p id="sec4-desc" class="text-slate-500 text-sm mt-2">Wujud transparansi Sekretariat untuk menjamin usulan warga telah dikawal hingga masuk ke Rencana Kerja Pemerintah Daerah (RKPD).</p>
+            </div>
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 max-w-2xl mx-auto">
+                <label class="block text-xs font-bold uppercase text-slate-500 mb-2.5 tracking-widest">Masukkan Nomor Tiket Pengaduan</label>
+                <div class="flex shadow-inner rounded-xl overflow-hidden border border-slate-300 focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent bg-slate-50">
+                    <input type="text" id="idTiket" class="p-4 w-full outline-none font-mono text-lg tracking-widest bg-transparent placeholder:font-sans placeholder:text-sm placeholder:tracking-normal" placeholder="Contoh: PKR-2026-0054" value="PKR-2026-0054">
+                    <button onclick="prosesTracer()" class="bg-blue-950 hover:bg-blue-900 text-white font-bold px-8 py-4 transition flex items-center space-x-2 shrink-0">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Lacak</span>
+                    </button>
+                </div>
+                <div id="boxHasilTracer" class="mt-8 pt-6 border-t border-dashed border-slate-200 hidden">
+                    <h4 class="font-bold text-blue-950 text-sm mb-5 uppercase tracking-wide"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-2"></i>Riwayat Progres Usulan Pokir:</h4>
+                    <div class="relative pl-6 border-l-2 border-blue-600 space-y-6 text-sm">
+                        <div>
+                            <div class="absolute -left-[31px] top-0.5 bg-emerald-600 w-4 h-4 rounded-full border-4 border-white"></div>
+                            <span class="text-xs text-slate-400 block font-bold">TAHAP 1: VERIFIKASI ADM</span>
+                            <p class="font-bold text-slate-700">Aspirasi divalidasi oleh Sub-Bagian TU dan Kepegawaian Sekretariat DPRD Kabupaten Sinjai.</p>
+                        </div>
+                        <div>
+                            <div class="absolute -left-[31px] top-0.5 bg-emerald-600 w-4 h-4 rounded-full border-4 border-white"></div>
+                            <span class="text-xs text-slate-400 block font-bold">TAHAP 2: TELAAHAN STAF</span>
+                            <p class="font-bold text-slate-700">Disposisi berkas menjadi Telaahan Staf untuk diserahkan ke Komisi Teknis Anggota Dewan terkait.</p>
+                        </div>
+                        <div>
+                            <div class="absolute -left-[31px] top-0.5 bg-amber-500 w-4 h-4 rounded-full border-4 border-white animate-pulse"></div>
+                            <span class="text-xs text-amber-600 block font-bold">TAHAP 3: AKOMODASI RKPD</span>
+                            <p id="text-tahap3" class="font-bold text-slate-800 bg-amber-50 p-3 rounded-xl border border-amber-200 mt-1">usulan disampaikan, selanjutnya akan dilakukan tindaklanjut aspirasi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: LIVE STREAMING -->
+    <section id="info-kontemporer" class="max-w-7xl mx-auto px-4 py-20">
+        <div class="text-center mb-12">
+            <h2 id="sec5-title" class="text-3xl font-extrabold text-blue-950 tracking-tight">KLIK Info (Layanan Informasi Kontemporer)</h2>
+            <p id="sec5-desc" class="text-slate-500 text-sm mt-2 max-w-xl mx-auto">Akses keterbukaan publik tanpa batas ruang. Saksikan transparansi jalannya persidangan dan jelajahi kantor perwakilan rakyat Anda.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+                <div class="bg-blue-950 text-white p-4 font-bold flex items-center justify-between text-sm tracking-wide">
+                    <span><i class="fa-solid fa-circle-dot text-red-500 mr-2 animate-pulse"></i> LIVE STREAMING SIDANG PARIPURNA</span>
+                    <span id="live-badge" class="text-[10px] bg-red-600 text-white px-2.5 py-0.5 rounded-full font-black tracking-widest animate-pulse">ON AIR</span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-center">
+                    <a id="live-video-link" href="https://youtube.com" target="_blank" class="bg-slate-900 w-full h-52 rounded-xl flex items-center justify-center text-white relative group cursor-pointer shadow-inner mb-4 block">
+                        <i class="fa-solid fa-play text-5xl text-amber-400 opacity-90 group-hover:scale-110 transition duration-300"></i>
+                        <span id="live-caption" class="absolute bottom-3 left-3 text-xs bg-black/60 px-2.5 py-1 rounded-md tracking-wide font-semibold">Masa Sidang Pleno Anggaran Kabupaten Sinjai</span>
+                    </a>
+                    <h4 id="live-title" class="font-bold text-slate-800 text-sm leading-snug">Rapat Paripurna Penyerahan Nota Kesepakatan Prioritas Plafon Anggaran Sementara Bersama Kepala Daerah</h4>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+                <div class="bg-blue-950 text-white p-4 font-bold flex items-center justify-between text-sm tracking-wide">
+                    <span><i class="fa-solid fa-street-view text-amber-400 mr-2"></i> VIRTUAL TOUR EDURAKYAT 360&deg;</span>
+                    <span class="text-[10px] bg-blue-800 text-blue-100 px-2.5 py-0.5 rounded-full font-bold tracking-wider">INTERAKTIF</span>
+                </div>
+                <div class="p-6 flex-grow flex flex-col justify-center text-center">
+                    <div class="bg-slate-100 w-full h-52 rounded-xl flex flex-col items-center justify-center text-slate-400 border border-dashed border-slate-300 shadow-inner mb-4">
+                        <i class="fa-solid fa-street-view text-5xl text-blue-950/30 mb-2"></i>
+                        <span class="text-xs font-bold text-blue-950/40 uppercase tracking-widest">Mulai Penjelajahan Ruang Sidang</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Eksplorasi Gedung Paripurna Secara Virtual</h4>
+                    <p class="text-xs text-slate-500 max-w-sm mx-auto">Sarana edukasi masyarakat untuk melihat langsung tata letak kursi fraksi dewan, ruang komisi, dan ruang aspirasi Sekretariat DPRD Kabupaten Sinjai.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: FORMULIR INPUT E-ASPIRASI -->
+    <section id="formulir-aduan" class="bg-white/90 py-20 border-t border-slate-200 backdrop-blur-sm">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 id="sec6-title" class="text-3xl font-extrabold text-blue-950 tracking-tight">Formulir Pengisian e-Aspirasi</h2>
+                <p id="sec6-desc" class="text-slate-500 text-sm mt-1">Setiap data aspirasi yang dikirim di sini akan diteruskan langsung ke email resmi Admin: <span class="font-semibold text-blue-950">dprdsinjai13@gmail.com</span>.</p>
+            </div>
+            
+            <form id="form-aspirasi" action="https://formspree.io/f/xoqgkeep" method="POST" class="space-y-5 bg-slate-50/60 p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-sm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" name="_subject" value="[KLIK DPRD] Aspirasi Baru Masuk!">
+                <input type="hidden" name="_replyto" value="dprdsinjai13@gmail.com">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1 tracking-wider">Nama Lengkap (Sesuai KTP)</label>
+                        <input type="text" id="f-nama" name="Nama Pelapor" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition bg-white shadow-sm" placeholder="Masukkan nama pelapor...">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1 tracking-wider">Nomor Kontak WhatsApp</label>
+                        <input type="tel" id="f-kontak" name="No WhatsApp" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition bg-white shadow-sm" placeholder="Contoh: 081234xxxxxx">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1 tracking-wider">Sektor Kategori Masalah</label>
+                        <select id="f-sektor" name="Sektor Masalah" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition bg-white shadow-sm font-semibold text-slate-700">
+                            <option>Infrastruktur & Sarana Jalan</option>
+                            <option>Pendidikan & Fasilitas Sekolah</option>
+                            <option>Kesehatan & Pelayanan Puskesmas</option>
+                            <option>Hukum, Tata Kelola & Regulasi Perda</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1 tracking-wider">Asal Daerah Pemilihan (Dapil)</label>
+                        <select id="f-dapil" name="Asal Dapil" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition bg-white shadow-sm font-semibold text-slate-700">
+                            <option>Dapil 1 (Sinjai Utara, Pulau 9, Bulupoddo)</option>
+                            <option>Dapil 2 (Sinjai Timur, Tellulimpoe)</option>
+                            <option>Dapil 3 (Sinjai Selatan, Sinjai Borong)</option>
+                            <option>Dapil 4 (Sinjai Tengah, Sinjai Barat)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1 tracking-wider">Isi Pokok Pikiran / Pengaduan</label>
+                    <textarea id="f-isi" name="Detail Pengaduan" required rows="4" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition bg-white shadow-sm placeholder:text-sm" placeholder="Gambarkan kronologi masalah secara mendetail..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-950 hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl shadow-md transition duration-300 transform active:scale-[0.99]">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> Kirim Aspirasi & Teruskan ke Email Admin
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-blue-950 text-slate-400 text-xs py-10 border-t border-blue-900 text-center space-y-2 relative z-10">
+        <p class="text-white font-bold text-sm tracking-wide">&copy; 2026 Sekretariat Dewan Perwakilan Rakyat Daerah Kabupaten Sinjai. Seluruh Hak Cipta Dilindungi.</p>
+        <p class="max-w-md mx-auto text-slate-500 leading-normal">Aplikasi Kontemporer Pendukung Transparansi Kinerja Fasilitasi Tugas Legislasi, Penganggaran, dan Pengawasan.</p>
+    </footer>
+
+    <!-- MODAL DASHBOARD PENGELOLA (DIKUNCI KETAT HANYA BISA DIAKSES OLEH ADMIN JIKA LOGIN AKTIF) -->
+    <div id="adminPanelModal" class="fixed inset-0 bg-black/70 z-50 flex justify-end hidden backdrop-blur-sm transition-opacity duration-300">
+        <div id="admin-secure-content" class="bg-slate-900 text-slate-100 w-full max-w-2xl h-full p-6 overflow-y-auto shadow-2xl border-l border-slate-800">
+            <!-- Isi Kontrol Utama Admin Di-Inject Menggunakan JavaScript Demi Keamanan Lapisan Web -->
+        </div>
+    </div>
+
+    <!-- LOGIKA JAVASCRIPT UTAMA & KONTROL SISTEM -->
+    <script>
+        // BASIS DATA AKUN ADMIN
+        let daftarAdmin = [
+            { user: "adminDPRD", pass: "sinjai2026Secure!" }
+        ];
+
+        let isLoggedInAdmin = false;
+
+        // STATE UTAMA BACKGROUND WEB
+        let currentBgType = 'default'; // 'default', 'solid', 'image-url', 'image-file'
+        let currentBgValue = '';
+
+        function bukaModalLogin() {
+            if (isLoggedInAdmin) {
+                prosesLogoutAdmin();
+            } else {
+                document.getElementById('loginModal').classList.remove('hidden');
+                switchAuthTab('login');
+            }
+        }
+
+        function tutupModalLogin() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('login-username').value = "";
+            document.getElementById('login-password').value = "";
+            document.getElementById('reg-username').value = "";
+            document.getElementById('reg-password').value = "";
+        }
+
+        function switchAuthTab(type) {
+            if(type === 'login') {
+                document.getElementById('form-login-internal').classList.remove('hidden');
+                document.getElementById('form-register-internal').classList.add('hidden');
+                document.getElementById('tab-login-btn').className = "w-1/2 pb-3 text-amber-400 border-b-2 border-amber-400 text-center";
+                document.getElementById('tab-register-btn').className = "w-1/2 pb-3 text-slate-400 text-center hover:text-white";
+            } else {
+                document.getElementById('form-login-internal').classList.add('hidden');
+                document.getElementById('form-register-internal').classList.remove('hidden');
+                document.getElementById('tab-login-btn').className = "w-1/2 pb-3 text-slate-400 text-center hover:text-white";
+                document.getElementById('tab-register-btn').className = "w-1/2 pb-3 text-blue-400 border-b-2 border-blue-400 text-center";
+            }
+        }
+
+        // PROSES PENDAFTARAN ADMIN BARU
+        document.getElementById('form-register-internal').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const uBaru = document.getElementById('reg-username').value.trim();
+            const pBaru = document.getElementById('reg-password').value.trim();
+
+            if(uBaru.length < 4 || pBaru.length < 5) {
+                alert("Gagal! Username minimal 4 karakter & Password minimal 5 karakter.");
+                return;
+            }
+
+            const isExist = daftarAdmin.some(account => account.user.toLowerCase() === uBaru.toLowerCase());
+            if(isExist) {
+                alert("⚠️ Username tersebut sudah terdaftar! Gunakan nama lain.");
+                return;
+            }
+
+            daftarAdmin.push({ user: uBaru, pass: pBaru });
+            alert(`Sukses! Akun Admin "${uBaru}" berhasil didaftarkan. Silakan klik tab 'Masuk'.`);
+            switchAuthTab('login');
+            document.getElementById('login-username').value = uBaru;
+        });
+
+        // PROSES LOGIN MASUK SISTEM
+        document.getElementById('form-login-internal').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+
+            const validAdmin = daftarAdmin.find(account => account.user === user && account.pass === pass);
+
+            if (validAdmin) {
+                isLoggedInAdmin = true;
+                alert(`Login Berhasil! Selamat datang Pengelola: ${user}.`);
+                
+                document.getElementById('floating-admin-btn').classList.remove('hidden');
+                document.getElementById('admin-status-bar').innerHTML = `
+                    <div class="flex items-center space-x-2 text-emerald-400 font-bold">
+                        <span><i class="fa-solid fa-circle-user text-xs"></i> Admin: ${user}</span>
+                        <span class="text-slate-500">|</span>
+                        <button type="button" onclick="prosesLogoutAdmin()" class="text-rose-400 hover:text-rose-300 transition uppercase font-black cursor-pointer">
+                            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                        </button>
+                    </div>
+                `;
+                buildAdminPanelUI(); 
+                tutupModalLogin();
+            } else {
+                alert("⚠️ Akun Pengelola Tidak Ditemukan / Password Salah!");
+            }
+        });
+
+        function prosesLogoutAdmin() {
+            isLoggedInAdmin = false;
+            document.getElementById('floating-admin-btn').classList.add('hidden');
+            document.getElementById('adminPanelModal').classList.add('hidden');
+            document.getElementById('admin-secure-content').innerHTML = ""; 
+            
+            document.getElementById('admin-status-bar').innerHTML = `
+                <button type="button" onclick="bukaModalLogin()" class="text-slate-300 hover:text-amber-400 font-bold tracking-wide transition uppercase cursor-pointer">
+                    <i class="fa-solid fa-lock mr-1"></i> Login / Daftar Pengelola
+                </button>
+            `;
+            alert("Sesi kontrol admin ditutup.");
+        }
+
+        function toggleAdminPanel() {
+            if (!isLoggedInAdmin) { 
+                alert("⛔ AKSES ILEGAL DITOLAK! Menu kontrol ini hanya bisa dibuka oleh admin resmi."); 
+                return; 
+            }
+            if (!document.getElementById('adminPanelModal').classList.contains('hidden')) {
+                document.getElementById('adminPanelModal').classList.add('hidden');
+            } else {
+                buildAdminPanelUI(); 
+                document.getElementById('adminPanelModal').classList.remove('hidden');
+            }
+        }
+
+        function dapatkanKotakMasukLokal() {
+            const list = localStorage.getItem('kotak_masuk_aspirasi');
+            return list ? JSON.parse(list) : [];
+        }
+
+        function simpanKotakMasukLokal(dataArray) {
+            localStorage.setItem('kotak_masuk_aspirasi', JSON.stringify(dataArray));
+        }
+
+        function ubahStatusBacaAspirasi(index) {
+            let data = dapatkanKotakMasukLokal();
+            if (data[index]) {
+                data[index].dibaca = !data[index].dibaca;
+                simpanKotakMasukLokal(data);
+                buildAdminPanelUI(); 
+            }
+        }
+
+        function hapusAspirasiSpesifik(index) {
+            if (confirm("Apakah Anda yakin ingin menghapus arsip data aspirasi ini dari database internal?")) {
+                let data = dapatkanKotakMasukLokal();
+                data.splice(index, 1);
+                simpanKotakMasukLokal(data);
+                buildAdminPanelUI();
+            }
+        }
+
+        function downloadCSVLaporan() {
+            const data = dapatkanKotakMasukLokal();
+            if(data.length === 0) {
+                alert("Tidak ada data laporan yang bisa diekspor.");
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Tanggal Masuk,Nama Pelapor,No WhatsApp,Sektor Masalah,Asal Dapil,Detail Pengaduan,Status\n";
+            
+            data.forEach(item => {
+                let row = `"${item.waktu}","${item.nama}","${item.kontak}","${item.sektor}","${item.dapil}","${item.isi.replace(/"/g, '""')}","${item.dibaca ? 'Sudah Dibaca' : 'Belum Dibaca'}"\n`;
+                csvContent += row;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Rekap_Laporan_eAspirasi_DPRD_Sinjai.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // FUNGSI KHUSUS MANAJEMEN PREVIEW BACKGROUND SECARA LIVE
+        function ubahTipeBg(tipe) {
+            currentBgType = tipe;
+            document.getElementById('box-solid-opt').classList.add('hidden');
+            document.getElementById('box-url-opt').classList.add('hidden');
+            document.getElementById('box-file-opt').classList.add('hidden');
+
+            if (tipe === 'solid') document.getElementById('box-solid-opt').classList.remove('hidden');
+            if (tipe === 'image-url') document.getElementById('box-url-opt').classList.remove('hidden');
+            if (tipe === 'image-file') document.getElementById('box-file-opt').classList.remove('hidden');
+            
+            if (tipe === 'default') {
+                aplikasikanBackgroundKeWeb('default', '');
+            }
+        }
+
+        function previewBgSolid() {
+            const val = document.getElementById('bg-solid-select').value;
+            currentBgValue = val;
+            aplikasikanBackgroundKeWeb('solid', val);
+        }
+
+        function previewBgUrl() {
+            const val = document.getElementById('bg-url-input').value.trim();
+            if(val !== '') {
+                currentBgValue = val;
+                aplikasikanBackgroundKeWeb('image-url', val);
+            }
+        }
+
+        function previewBgFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentBgValue = e.target.result; // Base64 Data URI
+                    aplikasikanBackgroundKeWeb('image-file', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function aplikasikanBackgroundKeWeb(tipe, value) {
+            const elBody = document.getElementById('main-body-bg');
+            // Reset style background bawaan
+            elBody.style.background = '';
+            elBody.className = "text-slate-800 font-sans antialiased transition-all duration-500 ";
+
+            if (tipe === 'default') {
+                elBody.className += "bg-slate-50";
+            } else if (tipe === 'solid') {
+                if (value.startsWith('linear-gradient')) {
+                    elBody.style.background = value;
+                    elBody.style.backgroundAttachment = 'fixed';
+                } else {
+                    elBody.style.backgroundColor = value;
+                }
+            } else if (tipe === 'image-url' || tipe === 'image-file') {
+                elBody.style.backgroundImage = `url('${value}')`;
+                elBody.style.backgroundSize = 'cover';
+                elBody.style.backgroundPosition = 'center';
+                elBody.style.backgroundAttachment = 'fixed';
+                elBody.style.backgroundRepeat = 'no-repeat';
+            }
+        }
+
+        // BUILD UI PANEL ADMIN DENGAN FITUR BACKGROUND BARU
+        function buildAdminPanelUI() {
+            const container = document.getElementById('admin-secure-content');
+            const dataInbox = dapatkanKotakMasukLokal();
+            
+            let htmlInboxList = "";
+            if (dataInbox.length === 0) {
+                htmlInboxList = `<p class="text-center py-6 italic text-slate-500 text-xs">Belum ada pengaduan atau aspirasi baru dari warga yang terekam di sistem lokal.</p>`;
+            } else {
+                dataInbox.forEach((item, index) => {
+                    htmlInboxList += `
+                        <div class="p-3 rounded-xl border ${item.dibaca ? 'bg-slate-950/40 border-slate-800/80 opacity-70' : 'bg-slate-950 border-amber-500/40'} text-xs space-y-2 relative group">
+                            <div class="flex justify-between items-start font-bold text-white border-b border-slate-800 pb-1.5">
+                                <div class="max-w-[70%]">
+                                    <span class="block text-amber-400 font-black">${item.nama}</span>
+                                    <span class="text-[10px] text-slate-400 font-mono font-normal block mt-0.5"><i class="fa-solid fa-phone text-[9px] mr-1"></i>${item.kontak}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[9px] text-slate-500 block font-mono font-normal">${item.waktu}</span>
+                                    <span class="inline-block mt-1 px-1.5 py-0.5 text-[9px] rounded font-bold uppercase tracking-wider ${item.dibaca ? 'bg-slate-800 text-slate-400' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
+                                        ${item.dibaca ? 'Selesai / Dibaca' : 'Baru'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-[10px] font-semibold text-slate-400 bg-slate-900/60 p-1.5 rounded-md border border-slate-800/40">
+                                <div><i class="fa-solid fa-map-pin mr-1 text-blue-400"></i>${item.dapil.split('(')[0]}</div>
+                                <div><i class="fa-solid fa-tags mr-1 text-amber-500"></i>${item.sektor}</div>
+                            </div>
+                            <p class="text-slate-200 leading-normal font-medium whitespace-pre-line bg-slate-900/30 p-2 rounded-lg border border-slate-800/20">"${item.isi}"</p>
+                            
+                            <div class="flex justify-end space-x-2 pt-1 border-t border-slate-800/40 text-[10px]">
+                                <button type="button" onclick="ubahStatusBacaAspirasi(${index})" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition font-bold">
+                                    <i class="fa-solid ${item.dibaca ? 'fa-envelope' : 'fa-envelope-open'} mr-1"></i> ${item.dibaca ? 'Tandai Belum Dibaca' : 'Tandai Sudah Dibaca'}
+                                </button>
+                                <button type="button" onclick="hapusAspirasiSpesifik(${index})" class="px-2 py-1 rounded bg-red-950/40 hover:bg-red-900 text-red-400 border border-red-900/30 transition font-bold">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = `
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-black text-amber-400 flex items-center"><i class="fa-solid fa-sliders mr-2"></i> PANEL KONTROL TOTAL</h2>
+                        <p class="text-xs text-slate-400 font-medium">Hak Akses: <span class="text-emerald-400 font-mono">Full Administrator Level 1</span></p>
+                    </div>
+                    <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- UTAMA: KOTAK MASUK (INBOX) PENGADUAN WARGA -->
+                <div class="bg-blue-950/40 border border-blue-900/80 p-4 rounded-xl mb-6 space-y-3">
+                    <div class="flex justify-between items-center border-b border-blue-900 pb-2">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                            <i class="fa-solid fa-inbox mr-1.5 text-sm"></i> Kotak Masuk e-Aspirasi Masuk (${dataInbox.length})
+                        </h3>
+                        ${dataInbox.length > 0 ? `
+                            <button type="button" onclick="downloadCSVLaporan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-1 rounded-md flex items-center transition">
+                                <i class="fa-solid fa-file-excel mr-1"></i> Download Rekap (.CSV)
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div id="admin-inbox-secure-list" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                        ${htmlInboxList}
+                    </div>
+                </div>
+
+                <!-- SELEKTOR UTAMA PENGATURAN TAMPILAN BACKGROUND WEB -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-amber-500/30 p-4 rounded-xl mb-6 space-y-4 shadow-md">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                        <i class="fa-solid fa-palette mr-1.5 text-sm"></i> Pengaturan Tampilan Latar Belakang (Background)
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1.5">Pilih Tipe Latar Belakang:</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs font-bold">
+                            <button type="button" onclick="ubahTipeBg('default')" class="p-2.5 rounded-lg border bg-slate-950 ${currentBgType === 'default' ? 'border-amber-400 text-amber-400' : 'border-slate-800 text-slate-400'} hover:border-slate-600 transition">Default</button>
+                            <button type="button" onclick="ubahTipeBg('solid')" class="p-2.5 rounded-lg border bg-slate-950 ${currentBgType === 'solid' ? 'border-amber-400 text-amber-400' : 'border-slate-800 text-slate-400'} hover:border-slate-600 transition">Warna / Gradasi</button>
+                            <button type="button" onclick="ubahTipeBg('image-url')" class="p-2.5 rounded-lg border bg-slate-950 ${currentBgType === 'image-url' ? 'border-amber-400 text-amber-400' : 'border-slate-800 text-slate-400'} hover:border-slate-600 transition">URL Gambar</button>
+                            <button type="button" onclick="ubahTipeBg('image-file')" class="p-2.5 rounded-lg border bg-slate-950 ${currentBgType === 'image-file' ? 'border-amber-400 text-amber-400' : 'border-slate-800 text-slate-400'} hover:border-slate-600 transition">Upload File</button>
+                        </div>
+                    </div>
+
+                    <!-- OPSIONAL 1: PILIHAN WARNA SOLID / GRADASI PREMIUM -->
+                    <div id="box-solid-opt" class="${currentBgType === 'solid' ? '' : 'hidden'} animate-fadeIn">
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Pilih Palet Tema Warna:</label>
+                        <select id="bg-solid-select" onchange="previewBgSolid()" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs font-semibold text-white outline-none">
+                            <option value="#f8fafc">Abu Ringan Standar (#f8fafc)</option>
+                            <option value="#f1f5f9">Slate Keabuan Lembut (#f1f5f9)</option>
+                            <option value="#e2e8f0">Slate Lebih Gelap (#e2e8f0)</option>
+                            <option value="#fafaf9">Stone Putih Hangat (#fafaf9)</option>
+                            <option value="#f0fdf4">Hijau Mint Segar Lumut (#f0fdf4)</option>
+                            <option value="#f0f9ff">Biru Langit Sejuk (#f0f9ff)</option>
+                            <option value="linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)">Gradasi 1: Corporate Light Slate</option>
+                            <option value="linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)">Gradasi 2: Soft Amber/Ivory</option>
+                            <option value="linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)">Gradasi 3: Nature Fresh Mint</option>
+                            <option value="linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)">Gradasi 4: Clean Ocean Breeze</option>
+                        </select>
+                    </div>
+
+                    <!-- OPSIONAL 2: GAMBAR KUSTOM BERDASARKAN URL INTERNET -->
+                    <div id="box-url-opt" class="${currentBgType === 'image-url' ? '' : 'hidden'} space-y-2">
+                        <label class="block text-[11px] text-slate-400 font-bold mb-0.5">Tautan/Link URL Gambar:</label>
+                        <div class="flex space-x-2">
+                            <input type="url" id="bg-url-input" class="flex-1 bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-white font-mono outline-none" placeholder="https://example.com/gambar-latar.jpg">
+                            <button type="button" onclick="previewBgUrl()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-xl font-bold transition">Uji Muat</button>
+                        </div>
+                        <p class="text-[10px] text-slate-500">Gunakan link langsung (.jpg/.png/.webp) agar gambar termuat sempurna.</p>
+                    </div>
+
+                    <!-- OPSIONAL 3: UNGGAH LANGSUNG FILE DARI HP/LAPTOP -->
+                    <div id="box-file-opt" class="${currentBgType === 'image-file' ? '' : 'hidden'}">
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Unggah Dokumen Gambar:</label>
+                        <input type="file" accept="image/*" onchange="previewBgFile(event)" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-slate-400 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-600 file:cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- MENU 1: KONTROL BAR NAVIGASI (NAVBAR) -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-compass mr-1"></i> 1. Kontrol Menu Navigasi (Navbar)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Nama Aplikasi Utama</label>
+                            <input type="text" id="input-nav-brand" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('nav-brand-title').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Sub-Slogan Aplikasi</label>
+                            <input type="text" id="input-nav-sub" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('nav-brand-sub').innerText}">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 1</label>
+                            <input type="text" id="in-m1" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu1').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 2</label>
+                            <input type="text" id="in-m2" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu2').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 3</label>
+                            <input type="text" id="in-m3" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu3').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 4</label>
+                            <input type="text" id="in-m4" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu4').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 5</label>
+                            <input type="text" id="in-m5" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu5').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">Menu 6</label>
+                            <input type="text" id="in-m6" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white outline-none" value="${document.getElementById('link-menu6').innerText}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENU 2: BERANDA & HERO TITLES -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-window-restore mr-1"></i> 2. Kontrol Beranda & Sub-Section Judul</h3>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Utama Hero Banner</label>
+                        <input type="text" id="input-hero-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="Menjembatani Konstituen dengan 30 Anggota DPRD Kab. Sinjai">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Deskripsi Singkat Banner</label>
+                        <textarea id="input-hero-desc" rows="2" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white tracking-wide outline-none">Sistem penyerapan aspirasi masyarakat terintegrasi berdasarkan wilayah Dapil dan sektor pembangunan untuk memudahkan perumusan Pokok Pikiran (Pokir) ke dalam RKPD.</textarea>
+                    </div>
+                    <div class="border-t border-slate-800/60 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Section 1 (Chart)</label>
+                            <input type="text" id="input-sec1-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('sec1-title').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Section 2 (Dapil)</label>
+                            <input type="text" id="input-sec2-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('sec2-title').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Section 3 (Dewan)</label>
+                            <input type="text" id="input-sec3-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('sec3-title').innerText}">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Section 4 (Tracer)</label>
+                            <input type="text" id="input-sec4-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('sec4-title').innerText}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENU 3: UPDATE GRAFIK REALTIME -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-chart-line mr-1"></i> 3. Manipulasi Data Angka Dashboard Pemetaan</h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400 text-center font-bold mb-1">Dapil 1</label>
+                            <input type="number" id="val-d1" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-center text-white outline-none" value="420">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 text-center font-bold mb-1">Dapil 2</label>
+                            <input type="number" id="val-d2" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-center text-white outline-none" value="310">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 text-center font-bold mb-1">Dapil 3</label>
+                            <input type="number" id="val-d3" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-center text-white outline-none" value="285">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 text-center font-bold mb-1">Dapil 4</label>
+                            <input type="number" id="val-d4" class="w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-center text-white outline-none" value="345">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENU 4: MANAGEMENT ANGGOTA DEWAN -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-user-plus mr-1"></i> 4. Manajemen Direktori Anggota Dewan</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Nama Lengkap & Gelar</label>
+                            <input type="text" id="add-nama" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" placeholder="Contoh: MUHAMMAD ASH, S.H.">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 font-bold mb-1">Penempatan Dapil</label>
+                            <select id="add-dapil" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white font-semibold outline-none">
+                                <option value="dapil1">Dapil 1 (Utara/P.9/Bulupoddo)</option>
+                                <option value="dapil2">Dapil 2 (Timur/Tellulimpoe)</option>
+                                <option value="dapil3">Dapil 3 (Selatan/Borong)</option>
+                                <option value="dapil4">Dapil 4 (Tengah/Barat)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" onclick="adminTambahDewan()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2 rounded-lg text-xs uppercase tracking-wider transition">
+                        Inject Anggota Dewan Baru ke Direktori
+                    </button>
+                </div>
+
+                <!-- MENU 5: CONTROL PENYIARAN & LINK LIVE STREAMING -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl mb-6 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-500"><i class="fa-solid fa-video mr-1"></i> 5. Kontrol Penyiaran (Live & Virtual Link)</h3>
+                    <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded border border-slate-700">
+                        <span class="text-xs font-bold text-slate-300">Status Live Streaming</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="live-toggle" checked class="sr-only peer" onchange="toggleLiveStatus()">
+                            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">URL / Link Tujuan Video Streaming (YouTube/Zoom)</label>
+                        <input type="url" id="input-live-url" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white font-mono outline-none" value="${document.getElementById('live-video-link').getAttribute('href')}">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Judul Agenda Rapat Paripurna</label>
+                        <input type="text" id="input-live-title" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('live-title').innerText}">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 font-bold mb-1">Teks Keterangan Tahap 3 Tracer Pokir</label>
+                        <input type="text" id="input-tahap3" class="w-full bg-slate-950 border border-slate-700 p-2 rounded text-xs text-white outline-none" value="${document.getElementById('text-tahap3').innerText}">
+                    </div>
+                </div>
+
+                <!-- COMPONENT MASTER PUBLISH BUTTON -->
+                <div class="sticky bottom-0 pt-4 bg-slate-900 border-t border-slate-800 flex space-x-3">
+                    <button type="button" onclick="simpanSemuaPerubahanAdmin()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest shadow-lg transition">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Publish Seluruh Perubahan Konten Web
+                    </button>
+                </div>
+            `;
+        }
+
+        // MASTER DATA AWAL ANGGOTA DEWAN KABUPATEN SINJAI
+        let dataDewan = [
+            { nama: "A. AZJUMAWANGSAH", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "A. OLIVIA BATARI SUGI", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "AGUS, SE", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "AKMAL", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "AMBO TUWO", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "ANDI JUSMAN", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "ANDI RIDWAN DARUL AQZAH PALEVI ASAPA", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "ANDI RUSMIATI RUSTHAM", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "ANDI ZAENAL ISKANDAR", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "ARDIANSYAH HARIS", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "ARDIANSYAH, SE", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "ARIFUDDIN", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "FACHRIANDI MATOA", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "H. BAHAR", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "H. RIDWAN ANIS", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "IQRAMULYO NUGROHO", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "IRMAWATI, SE", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "JALIL, S.Sos", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "KAMRIANTO", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "MAPPAHAKKANG", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "MISNA", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "MUH. DAHLAN", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "MUH. DARWIS", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "MUHAMMAD ASH SHIDDIEQY K. SAMMA, S.H.", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "MUHAMMAD RIDWAN, S.S.", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "NURFA DAMAYANTI", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "SABIR", dapil: "dapil3", wilayah: "Dapil 3 (Selatan/Borong)" },
+            { nama: "SALDI", dapil: "dapil2", wilayah: "Dapil 2 (Timur/Tellulimpoe)" },
+            { nama: "SUTOMO, SE", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" },
+            { nama: "ZAINAL ABIDIN HASNUR", dapil: "dapil4", wilayah: "Dapil 4 (Tengah/Barat)" },
+            { nama: "ZULKIFLI, SE", dapil: "dapil1", wilayah: "Dapil 1 (Utara/P.9/Bulupoddo)" }
+        ];
+
+        function renderDewan(filter = 'all') {
+            const grid = document.getElementById('grid-dewan');
+            grid.innerHTML = '';
+            const filteredData = filter === 'all' ? dataDewan : dataDewan.filter(d => d.dapil === filter);
+            document.getElementById('btn-all').innerText = `Semua Dapil (${dataDewan.length})`;
+
+            filteredData.forEach(dewan => {
+                const card = document.createElement('div');
+                card.className = "bg-blue-900/40 border border-blue-800/80 p-4 rounded-xl flex items-center space-x-3 transition hover:border-amber-500 shadow-sm";
+                card.innerHTML = `
+                    <div class="bg-amber-500 text-blue-950 w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="font-bold text-xs tracking-wide uppercase text-white truncate" title="${dewan.nama}">${dewan.nama}</h4>
+                        <span class="text-[10px] text-slate-400 block mt-0.5"><i class="fa-solid fa-map-location-dot mr-1"></i>${dewan.wilayah}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterDewan(dapilId) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn bg-blue-900 border border-blue-800 hover:border-amber-500 text-slate-300 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition";
+            });
+            const activeBtn = document.getElementById(`btn-${dapilId}`);
+            if(activeBtn) activeBtn.className = "filter-btn bg-amber-500 text-blue-950 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md";
+            renderDewan(dapilId);
+        }
+
+        // GRAFIK CHART.JS
+        let chartSektor, chartDapil;
+        function initCharts() {
+            const ctxSektor = document.getElementById('canvasSektor').getContext('2d');
+            chartSektor = new Chart(ctxSektor, {
+                type: 'pie',
+                data: {
+                    labels: ['Infrastruktur', 'Pendidikan', 'Kesehatan', 'Hukum/Perda'],
+                    datasets: [{ data: [45, 25, 20, 10], backgroundColor: ['#1e3a8a', '#f59e0b', '#10b981', '#64748b'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctxDapil = document.getElementById('canvasDapil').getContext('2d');
+            chartDapil = new Chart(ctxDapil, {
+                type: 'bar',
+                data: {
+                    labels: ['Dapil 1', 'Dapil 2', 'Dapil 3', 'Dapil 4'],
+                    datasets: [{ label: 'Volume Berkas', data: [420, 310, 285, 345], backgroundColor: '#1e3a8a' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function prosesTracer() {
+            const token = document.getElementById('idTiket').value.trim();
+            const boxHasil = document.getElementById('boxHasilTracer');
+            if(token === "") { alert("Mohon ketikkan nomor tiket."); return; }
+            boxHasil.classList.remove('hidden');
+            boxHasil.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleFormSubmit(event) {
+            const nama = document.getElementById('f-nama').value.trim();
+            const kontak = document.getElementById('f-kontak').value.trim();
+            const sektor = document.getElementById('f-sektor').value;
+            const dapil = document.getElementById('f-dapil').value;
+            const isi = document.getElementById('f-isi').value.trim();
+
+            const tgl = new Date();
+            const stringWaktu = `${tgl.getDate()}/${tgl.getMonth()+1}/${tgl.getFullYear()} ${tgl.getHours().toString().padStart(2, '0')}:${tgl.getMinutes().toString().padStart(2, '0')}`;
+
+            const laporanBaru = {
+                nama: nama,
+                kontak: kontak,
+                sektor: sektor,
+                dapil: dapil,
+                isi: isi,
+                waktu: stringWaktu,
+                dibaca: false
+            };
+
+            let listDataSistem = dapatkanKotakMasukLokal();
+            listDataSistem.unshift(laporanBaru);
+            simpanKotakMasukLokal(listDataSistem);
+
+            if (isLoggedInAdmin) {
+                buildAdminPanelUI();
+            }
+
+            alert("Aspirasi Anda Berhasil Terkirim ke dprdsinjai13@gmail.com dan berhasil diarsip di Kotak Masuk Sistem Utama!");
+        }
+
+        function toggleLiveStatus() {
+            if(!isLoggedInAdmin) return;
+            const isLive = document.getElementById('live-toggle').checked;
+            const badge = document.getElementById('live-badge');
+            if(isLive) {
+                badge.className = "text-[10px] bg-red-600 text-white px-2.5 py-0.5 rounded-full font-black tracking-widest animate-pulse";
+                badge.innerText = "ON AIR";
+            } else {
+                badge.className = "text-[10px] bg-slate-600 text-slate-300 px-2.5 py-0.5 rounded-full font-black tracking-widest";
+                badge.innerText = "OFFLINE";
+            }
+        }
+
+        function adminTambahDewan() {
+            if(!isLoggedInAdmin) return;
+            const namaInput = document.getElementById('add-nama').value.trim().toUpperCase();
+            const dapilSelect = document.getElementById('add-dapil');
+            const dapilVal = dapilSelect.value;
+            const dapilText = dapilSelect.options[dapilSelect.selectedIndex].text;
+
+            if(namaInput === "") { alert("Mohon isi Nama Anggota Dewan!"); return; }
+            dataDewan.push({ nama: namaInput, dapil: dapilVal, wilayah: dapilText });
+            dataDewan.sort((a, b) => a.nama.localeCompare(b.nama));
+            
+            document.getElementById('add-nama').value = "";
+            renderDewan('all');
+            alert(`Berhasil menyisipkan data ${namaInput}.`);
+        }
+
+        // SIMPAN PERUBAHAN MASSAL DARI ADMIN PANEL KE WEB UTAMA
+        function simpanSemuaPerubahanAdmin() {
+            if(!isLoggedInAdmin) return;
+
+            // Kunci Nilai Tetap Konfigurasi Background saat tombol publish ditekan
+            localStorage.setItem('saved_bg_type', currentBgType);
+            localStorage.setItem('saved_bg_value', currentBgValue);
+
+            // 1. Sinkronisasi Navbar & Brand
+            document.getElementById('nav-brand-title').innerText = document.getElementById('input-nav-brand').value;
+            document.getElementById('nav-brand-sub').innerText = document.getElementById('input-nav-sub').value;
+            document.getElementById('link-menu1').innerText = document.getElementById('in-m1').value;
+            document.getElementById('link-menu2').innerText = document.getElementById('in-m2').value;
+            document.getElementById('link-menu3').innerText = document.getElementById('in-m3').value;
+            document.getElementById('link-menu4').innerText = document.getElementById('in-m4').value;
+            document.getElementById('link-menu5').innerText = document.getElementById('in-m5').value;
+            document.getElementById('link-menu6').innerText = document.getElementById('in-m6').value;
+
+            // 2. Sinkronisasi Judul Section Konten
+            document.getElementById('hero-title').innerHTML = document.getElementById('input-hero-title').value;
+            document.getElementById('hero-desc').innerText = document.getElementById('input-hero-desc').value;
+            document.getElementById('sec1-title').innerText = document.getElementById('input-sec1-title').value;
+            document.getElementById('sec2-title').innerText = document.getElementById('input-sec2-title').value;
+            document.getElementById('sec3-title').innerText = document.getElementById('input-sec3-title').value;
+            document.getElementById('sec4-title').innerText = document.getElementById('input-sec4-title').value;
+
+            // 3. Sinkronisasi Angka Grafik (Chart)
+            const v1 = parseInt(document.getElementById('val-d1').value) || 0;
+            const v2 = parseInt(document.getElementById('val-d2').value) || 0;
+            const v3 = parseInt(document.getElementById('val-d3').value) || 0;
+            const v4 = parseInt(document.getElementById('val-d4').value) || 0;
+            chartDapil.data.datasets[0].data = [v1, v2, v3, v4];
+            chartDapil.update();
+
+            // 4. Sinkronisasi Teks & URL Live Video Link
+            document.getElementById('live-title').innerText = document.getElementById('input-live-title').value;
+            document.getElementById('live-video-link').setAttribute('href', document.getElementById('input-live-url').value);
+            document.getElementById('text-tahap3').innerText = document.getElementById('input-tahap3').value;
+
+            toggleAdminPanel();
+            alert("Sinkronisasi Konten Selesai! Seluruh konfigurasi web dan tema latar belakang berhasil diperbarui.");
+        }
+
+        // LOAD MEMORI LOCALSTORAGE SAAT HALAMAN DIBUKA PERTAMA KALI
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedType = localStorage.getItem('saved_bg_type');
+            const savedValue = localStorage.getItem('saved_bg_value');
+            if(savedType) {
+                currentBgType = savedType;
+                currentBgValue = savedValue || '';
+                aplikasikanBackgroundKeWeb(savedType, currentBgValue);
+            }
+        });
+
+        // EKSEKUSI RUNTIME
+        renderDewan('all');
+        initCharts();
+    </script>
+</body>
+</html>
